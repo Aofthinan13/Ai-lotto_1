@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
 
 <meta charset="UTF-8">
@@ -9,7 +8,7 @@
 name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>Turbo Lotto AI</title>
+<title>Turbo Lotto AI PRO</title>
 
 <link rel="preconnect"
 href="https://fonts.googleapis.com">
@@ -38,7 +37,7 @@ color:white;
 
 background:rgba(255,255,255,.05);
 
-backdrop-filter:blur(12px);
+backdrop-filter:blur(6px);
 
 border:1px solid rgba(255,255,255,.08);
 
@@ -46,8 +45,8 @@ border:1px solid rgba(255,255,255,.08);
 
 .ball{
 
-width:70px;
-height:70px;
+width:68px;
+height:68px;
 
 border-radius:999px;
 
@@ -60,7 +59,12 @@ font-weight:bold;
 
 color:white;
 
-animation:pop .4s ease;
+transition:.3s;
+
+animation:pop .35s ease;
+
+box-shadow:
+0 10px 20px rgba(0,0,0,.35);
 
 }
 
@@ -82,6 +86,48 @@ opacity:1;
 
 }
 
+button{
+
+transition:.2s;
+
+}
+
+button:active{
+
+transform:scale(.96);
+
+}
+
+.loading{
+
+animation:pulse 1s infinite;
+
+}
+
+.fadeIn{
+
+animation:fade .4s ease;
+
+}
+
+@keyframes fade{
+
+0%{
+
+opacity:0;
+transform:translateY(10px);
+
+}
+
+100%{
+
+opacity:1;
+transform:translateY(0);
+
+}
+
+}
+
 </style>
 
 </head>
@@ -90,17 +136,17 @@ opacity:1;
 
 <div class="max-w-md mx-auto">
 
-<div class="glass rounded-3xl p-5 shadow-2xl">
+<div class="glass rounded-3xl p-5 shadow-2xl fadeIn">
 
 <h1 class="text-4xl font-bold text-center mb-2">
 
-🎯 Turbo Lotto AI
+🎯 Turbo Lotto AI PRO
 
 </h1>
 
 <p class="text-center text-cyan-400 mb-6">
 
-AI Prediction System
+Advanced Prediction System
 
 </p>
 
@@ -110,7 +156,7 @@ AI Prediction System
 
 <button
 id="thaiBtn"
-class="flex-1 bg-emerald-600 py-3 rounded-xl font-bold transition">
+class="flex-1 bg-emerald-600 py-3 rounded-xl font-bold">
 
 🇹🇭 หวยไทย
 
@@ -118,7 +164,7 @@ class="flex-1 bg-emerald-600 py-3 rounded-xl font-bold transition">
 
 <button
 id="laoBtn"
-class="flex-1 bg-slate-800 py-3 rounded-xl font-bold transition">
+class="flex-1 bg-slate-800 py-3 rounded-xl font-bold">
 
 🇱🇦 หวยลาว
 
@@ -224,6 +270,26 @@ class="grid grid-cols-5 gap-2">
 
 </div>
 
+<!-- CONFIDENCE -->
+
+<div class="mt-8">
+
+<h2 class="font-bold mb-3">
+
+📈 AI Confidence
+
+</h2>
+
+<div
+id="confidenceBox"
+class="glass rounded-2xl p-5 text-center">
+
+--
+
+</div>
+
+</div>
+
 </div>
 
 </div>
@@ -234,26 +300,34 @@ class="grid grid-cols-5 gap-2">
  GLOBAL
 ========================= */
 
-let currentMode='thai';
+let currentMode=
+localStorage.getItem('mode')
+||'thai';
 
 /* =========================
  DATA
 ========================= */
 
 const thaiNumbers=[
+
 '985452',
 '284729',
 '543118',
 '074205',
-'998887'
+'998887',
+'125272',
+'361807'
+
 ];
 
 const laoNumbers=[
+
 '8769',
 '0470',
 '3369',
 '7095',
 '9996'
+
 ];
 
 /* =========================
@@ -284,11 +358,16 @@ document.getElementById('bottomContainer');
 const hotDigits=
 document.getElementById('hotDigits');
 
+const confidenceBox=
+document.getElementById('confidenceBox');
+
 /* =========================
  HOT DIGITS
 ========================= */
 
 function renderHotDigits(){
+
+try{
 
 hotDigits.innerHTML='';
 
@@ -305,13 +384,18 @@ currentMode==='thai'
 ?thaiNumbers
 :laoNumbers;
 
-source.forEach(item=>{
+/* recent weight */
+
+source.forEach((item,index)=>{
+
+const weight=
+source.length-index;
 
 item
 .split('')
 .forEach(n=>{
 
-freq[n]++;
+freq[n]+=weight;
 
 });
 
@@ -328,7 +412,7 @@ const div=
 document.createElement('div');
 
 div.className=
-'glass rounded-xl p-3 text-center';
+'glass rounded-xl p-3 text-center fadeIn';
 
 div.innerHTML=`
 
@@ -349,6 +433,12 @@ ${item[1]} hits
 hotDigits.appendChild(div);
 
 });
+
+}catch(error){
+
+console.log(error);
+
+}
 
 }
 
@@ -382,10 +472,10 @@ container.appendChild(div);
 }
 
 /* =========================
- AI RANDOM
+ POSITIONAL AI
 ========================= */
 
-function weightedRandom(){
+function weightedRandom(position){
 
 const freq={};
 
@@ -400,20 +490,40 @@ currentMode==='thai'
 ?thaiNumbers
 :laoNumbers;
 
+/* position analysis */
+
 source.forEach((item,index)=>{
 
 const weight=
-source.length-index;
+Math.floor(
+(source.length-index)*0.7
+);
 
-item
-.split('')
-.forEach(n=>{
+const digit=
+item[position];
 
-freq[n]+=weight;
+if(digit!==undefined){
+
+freq[digit]+=weight;
+
+}
 
 });
 
+/* anti spam */
+
+Object.keys(freq)
+.forEach(key=>{
+
+if(freq[key]>18){
+
+freq[key]-=4;
+
+}
+
 });
+
+/* pool */
 
 const pool=[];
 
@@ -438,10 +548,123 @@ Math.random()*pool.length
 }
 
 /* =========================
+ CONFIDENCE
+========================= */
+
+function renderConfidence(number){
+
+try{
+
+let score=0;
+
+const digits=
+number.split('');
+
+const unique=
+new Set(digits);
+
+score+=unique.size*10;
+
+const source=
+currentMode==='thai'
+?thaiNumbers
+:laoNumbers;
+
+/* hot match */
+
+digits.forEach(d=>{
+
+source.forEach(n=>{
+
+if(n.includes(d)){
+
+score+=2;
+
+}
+
+});
+
+});
+
+/* odd even */
+
+let odd=0;
+let even=0;
+
+digits.forEach(d=>{
+
+if(Number(d)%2===0){
+
+even++;
+
+}else{
+
+odd++;
+
+}
+
+});
+
+if(
+Math.abs(odd-even)<=2
+){
+
+score+=10;
+
+}
+
+/* no spam */
+
+if(unique.size===digits.length){
+
+score+=10;
+
+}
+
+/* limit */
+
+if(score>99){
+
+score=99;
+
+}
+
+confidenceBox.innerHTML=`
+
+<div class="text-5xl font-bold text-emerald-400 fadeIn">
+
+${score}%
+
+</div>
+
+<div class="text-slate-400 mt-2">
+
+AI Probability Score
+
+</div>
+
+`;
+
+}catch(error){
+
+console.log(error);
+
+}
+
+}
+
+/* =========================
  GENERATE
 ========================= */
 
 function generateAI(){
+
+try{
+
+generateBtn.disabled=true;
+
+generateBtn.innerHTML=
+'⏳ กำลังวิเคราะห์...';
 
 const length=
 currentMode==='thai'
@@ -450,11 +673,32 @@ currentMode==='thai'
 
 let number='';
 
+let attempts=0;
+
+while(attempts<10){
+
+number='';
+
 for(let i=0;i<length;i++){
 
-number+=weightedRandom();
+number+=weightedRandom(i);
 
 }
+
+const unique=
+new Set(number);
+
+if(unique.size>2){
+
+break;
+
+}
+
+attempts++;
+
+}
+
+/* results */
 
 const three=
 number.slice(-3);
@@ -467,9 +711,9 @@ let bottom='';
 if(currentMode==='thai'){
 
 bottom=
-weightedRandom()
+weightedRandom(4)
 +
-weightedRandom();
+weightedRandom(5);
 
 }else{
 
@@ -477,6 +721,10 @@ bottom=
 number.slice(0,2);
 
 }
+
+/* loading */
+
+setTimeout(()=>{
 
 renderBalls(
 mainContainer,
@@ -502,43 +750,78 @@ bottom,
 'bg-gradient-to-br from-yellow-500 to-orange-600'
 );
 
+renderConfidence(number);
+
+generateBtn.disabled=false;
+
+generateBtn.innerHTML=
+'🚀 วิเคราะห์เลข AI';
+
+},500);
+
+}catch(error){
+
+console.log(error);
+
+generateBtn.disabled=false;
+
+generateBtn.innerHTML=
+'🚀 วิเคราะห์เลข AI';
+
+}
+
 }
 
 /* =========================
  MODE
 ========================= */
 
-thaiBtn.onclick=()=>{
+function setMode(mode){
 
-currentMode='thai';
+currentMode=mode;
+
+localStorage.setItem(
+'mode',
+mode
+);
+
+if(mode==='thai'){
 
 thaiBtn.className=
-'flex-1 bg-emerald-600 py-3 rounded-xl font-bold transition';
+'flex-1 bg-emerald-600 py-3 rounded-xl font-bold';
 
 laoBtn.className=
-'flex-1 bg-slate-800 py-3 rounded-xl font-bold transition';
+'flex-1 bg-slate-800 py-3 rounded-xl font-bold';
+
+}else{
+
+laoBtn.className=
+'flex-1 bg-red-600 py-3 rounded-xl font-bold';
+
+thaiBtn.className=
+'flex-1 bg-slate-800 py-3 rounded-xl font-bold';
+
+}
 
 renderHotDigits();
+
+}
+
+/* =========================
+ BUTTONS
+========================= */
+
+thaiBtn.onclick=()=>{
+
+setMode('thai');
 
 };
 
 laoBtn.onclick=()=>{
 
-currentMode='lao';
-
-laoBtn.className=
-'flex-1 bg-red-600 py-3 rounded-xl font-bold transition';
-
-thaiBtn.className=
-'flex-1 bg-slate-800 py-3 rounded-xl font-bold transition';
-
-renderHotDigits();
+setMode('lao');
 
 };
-
-/* =========================
- BUTTON
-========================= */
 
 generateBtn.onclick=
 generateAI;
@@ -547,10 +830,11 @@ generateAI;
  START
 ========================= */
 
+setMode(currentMode);
+
 renderHotDigits();
 
 </script>
 
 </body>
-
 </html>
