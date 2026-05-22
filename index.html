@@ -11,8 +11,6 @@ content="width=device-width, initial-scale=1.0">
 
 <title>Turbo Lotto AI</title>
 
-<!-- FONT -->
-
 <link rel="preconnect"
 href="https://fonts.googleapis.com">
 
@@ -24,18 +22,15 @@ crossorigin>
 href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap"
 rel="stylesheet">
 
-<!-- MANIFEST -->
-
-<link rel="manifest"
-href="manifest.json">
-
-<!-- TAILWIND -->
-
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- TFJS -->
-
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
+<!-- FIREBASE COMPAT -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <style>
 
@@ -44,16 +39,6 @@ body{
 font-family:'Kanit',sans-serif;
 background:#020617;
 color:white;
-
-}
-
-.glass{
-
-background:rgba(255,255,255,.05);
-
-backdrop-filter:blur(12px);
-
-border:1px solid rgba(255,255,255,.08);
 
 }
 
@@ -73,38 +58,15 @@ font-weight:bold;
 
 color:white;
 
-animation:pop .4s ease;
-
 }
 
-@keyframes pop{
+.glass{
 
-0%{
+background:rgba(255,255,255,.05);
 
-transform:scale(.5);
-opacity:0;
+backdrop-filter:blur(10px);
 
-}
-
-100%{
-
-transform:scale(1);
-opacity:1;
-
-}
-
-}
-
-.loading{
-
-animation:pulse 1s infinite;
-
-}
-
-button:disabled{
-
-opacity:.5;
-cursor:not-allowed;
+border:1px solid rgba(255,255,255,.08);
 
 }
 
@@ -116,7 +78,7 @@ cursor:not-allowed;
 
 <div class="max-w-md mx-auto">
 
-<div class="glass rounded-3xl p-5 shadow-2xl">
+<div class="glass rounded-3xl p-5">
 
 <h1 class="text-4xl font-bold text-center mb-2">
 
@@ -126,11 +88,9 @@ cursor:not-allowed;
 
 <p class="text-center text-cyan-400 mb-6">
 
-Realtime Firebase Edition
+Realtime Edition
 
 </p>
-
-<!-- BUTTON -->
 
 <div class="flex gap-3 mb-6">
 
@@ -152,23 +112,19 @@ class="flex-1 bg-slate-800 py-3 rounded-xl font-bold">
 
 </div>
 
-<!-- GENERATE -->
-
 <button
 id="generateBtn"
-class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 py-4 rounded-2xl font-bold text-lg shadow-lg mb-6">
+class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 py-4 rounded-2xl font-bold mb-6">
 
-🚀 วิเคราะห์ด้วย AI
+🚀 วิเคราะห์ AI
 
 </button>
 
-<!-- AI STATUS -->
+<div class="mb-6">
 
-<div class="glass rounded-2xl p-4 mb-6">
+<div class="flex justify-between">
 
-<div class="flex justify-between items-center">
-
-<span class="font-bold">
+<span>
 
 AI STATUS
 
@@ -178,7 +134,7 @@ AI STATUS
 id="aiStatus"
 class="text-yellow-400">
 
-Loading...
+READY
 
 </span>
 
@@ -186,11 +142,7 @@ Loading...
 
 </div>
 
-<!-- RESULT -->
-
-<div class="space-y-5">
-
-<div>
+<div class="mb-6">
 
 <h2 class="font-bold mb-3">
 
@@ -206,7 +158,7 @@ class="flex justify-center gap-2 flex-wrap">
 
 </div>
 
-<div>
+<div class="mb-6">
 
 <h2 class="font-bold mb-3">
 
@@ -222,7 +174,7 @@ class="flex justify-center gap-2 flex-wrap">
 
 </div>
 
-<div>
+<div class="mb-6">
 
 <h2 class="font-bold mb-3">
 
@@ -238,7 +190,7 @@ class="flex justify-center gap-2 flex-wrap">
 
 </div>
 
-<div>
+<div class="mb-6">
 
 <h2 class="font-bold mb-3 text-yellow-400">
 
@@ -254,11 +206,7 @@ class="flex justify-center gap-2 flex-wrap">
 
 </div>
 
-</div>
-
-<!-- HOT -->
-
-<div class="mt-8">
+<div class="mb-6">
 
 <h2 class="font-bold mb-3">
 
@@ -274,13 +222,11 @@ class="grid grid-cols-5 gap-2">
 
 </div>
 
-<!-- HISTORY -->
-
-<div class="mt-8">
+<div>
 
 <h2 class="font-bold mb-3">
 
-📊 Realtime History
+📊 History
 
 </h2>
 
@@ -296,76 +242,62 @@ class="space-y-3">
 
 </div>
 
-<script type="module">
+<script>
 
-/* =========================
- FIREBASE
-========================= */
-
-import {
-
-initializeApp
-
-}
-from
-'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-
-import {
-
-getDatabase,
-ref,
-set,
-onValue
-
-}
-from
-'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
-
-/* =========================
- CONFIG
-========================= */
-
-const firebaseConfig={
-
-apiKey:"PUT_API_KEY",
-
-authDomain:"PUT_AUTH_DOMAIN",
-
-databaseURL:"PUT_DATABASE_URL",
-
-projectId:"PUT_PROJECT_ID",
-
-storageBucket:"PUT_STORAGE_BUCKET",
-
-messagingSenderId:"PUT_SENDER_ID",
-
-appId:"PUT_APP_ID"
-
-};
-
-/* =========================
- INIT
-========================= */
-
-const app=
-initializeApp(firebaseConfig);
-
-const db=
-getDatabase(app);
-
-/* =========================
- GLOBAL
-========================= */
+/* ======================
+ DATA
+====================== */
 
 let currentMode='thai';
 
-let isGenerating=false;
+const historyData={
 
-let aiModel=null;
+thai:[
 
-/* =========================
+{
+date:'16 พ.ค. 69',
+main:'985452',
+bottom:'95'
+},
+
+{
+date:'2 พ.ค. 69',
+main:'284729',
+bottom:'38'
+},
+
+{
+date:'16 เม.ย. 69',
+main:'543118',
+bottom:'21'
+}
+
+],
+
+lao:[
+
+{
+date:'20 พ.ค. 69',
+main:'8769'
+},
+
+{
+date:'18 พ.ค. 69',
+main:'9572'
+},
+
+{
+date:'15 พ.ค. 69',
+main:'3417'
+}
+
+]
+
+};
+
+/* ======================
  ELEMENTS
-========================= */
+====================== */
 
 const thaiBtn=
 document.getElementById('thaiBtn');
@@ -394,153 +326,9 @@ document.getElementById('historyContainer');
 const hotDigits=
 document.getElementById('hotDigits');
 
-const aiStatus=
-document.getElementById('aiStatus');
-
-/* =========================
- DATABASE
-========================= */
-
-let historyData={
-
-thai:[],
-
-lao:[
-{
-date:'20 พ.ค. 69',
-main:'8769'
-},
-{
-date:'18 พ.ค. 69',
-main:'9572'
-},
-{
-date:'15 พ.ค. 69',
-main:'3417'
-},
-{
-date:'13 พ.ค. 69',
-main:'7804'
-},
-{
-date:'11 พ.ค. 69',
-main:'1932'
-}
-]
-
-};
-
-/* =========================
- FIREBASE LOAD
-========================= */
-
-function listenRealtime(){
-
-onValue(
-
-ref(db,'lotto'),
-
-(snapshot)=>{
-
-const data=
-snapshot.val();
-
-if(data){
-
-historyData=data;
-
-renderHistory();
-
-renderHotDigits();
-
-}
-
-}
-
-);
-
-}
-
-/* =========================
- FETCH THAI
-========================= */
-
-async function fetchThai(){
-
-try{
-
-const response=
-await fetch(
-'https://lotto.api.rayriffy.com/latest'
-);
-
-const json=
-await response.json();
-
-const firstPrize=
-json.response.prizes.find(
-p=>p.id==='first'
-);
-
-const lastTwo=
-json.response.runningNumbers.find(
-n=>n.id==='lastTwo'
-);
-
-const result={
-
-date:json.response.date,
-
-main:firstPrize.number,
-
-bottom:lastTwo.number
-
-};
-
-const exists=
-historyData.thai.some(
-x=>x.date===result.date
-);
-
-if(!exists){
-
-historyData.thai.unshift(result);
-
-await saveRealtime();
-
-}
-
-}catch(error){
-
-console.log(error);
-
-}
-
-}
-
-/* =========================
- SAVE FIREBASE
-========================= */
-
-async function saveRealtime(){
-
-await set(
-
-ref(db,'lotto'),
-
-historyData
-
-);
-
-renderHistory();
-
-renderHotDigits();
-
-}
-
-/* =========================
+/* ======================
  HISTORY
-========================= */
+====================== */
 
 function renderHistory(){
 
@@ -559,7 +347,7 @@ if(currentMode==='thai'){
 
 div.innerHTML=`
 
-<div class="flex justify-between mb-2">
+<div class="flex justify-between">
 
 <span class="text-emerald-400 text-xs">
 
@@ -575,7 +363,7 @@ ${item.date}
 
 </div>
 
-<div class="text-2xl font-bold">
+<div class="text-2xl font-bold mt-2">
 
 ${item.main}
 
@@ -593,7 +381,7 @@ item.main.slice(0,2);
 
 div.innerHTML=`
 
-<div class="flex justify-between mb-2">
+<div class="flex justify-between">
 
 <span class="text-red-400 text-xs">
 
@@ -603,7 +391,7 @@ ${item.date}
 
 </div>
 
-<div class="text-2xl font-bold">
+<div class="text-2xl font-bold mt-2">
 
 ${item.main}
 
@@ -625,9 +413,9 @@ historyContainer.appendChild(div);
 
 }
 
-/* =========================
+/* ======================
  HOT DIGITS
-========================= */
+====================== */
 
 function renderHotDigits(){
 
@@ -642,16 +430,13 @@ freq[i]=0;
 }
 
 historyData[currentMode]
-.forEach((item,index)=>{
-
-const weight=
-historyData[currentMode].length-index;
+.forEach(item=>{
 
 item.main
 .split('')
 .forEach(n=>{
 
-freq[n]+=weight;
+freq[n]++;
 
 });
 
@@ -680,7 +465,7 @@ ${item[0]}
 
 <div class="text-xs text-slate-400">
 
-score ${item[1]}
+${item[1]} hits
 
 </div>
 
@@ -692,235 +477,9 @@ hotDigits.appendChild(div);
 
 }
 
-/* =========================
- AI MODEL
-========================= */
-
-async function createModel(){
-
-const size=
-currentMode==='thai'
-?6
-:4;
-
-aiModel=tf.sequential();
-
-aiModel.add(
-
-tf.layers.dense({
-
-units:64,
-
-activation:'relu',
-
-inputShape:[size]
-
-})
-
-);
-
-aiModel.add(
-
-tf.layers.dense({
-
-units:32,
-
-activation:'relu'
-
-})
-
-);
-
-aiModel.add(
-
-tf.layers.dense({
-
-units:size,
-
-activation:'sigmoid'
-
-})
-
-);
-
-aiModel.compile({
-
-optimizer:'adam',
-
-loss:'meanSquaredError'
-
-});
-
-}
-
-/* =========================
- TRAIN
-========================= */
-
-async function trainAI(){
-
-const dataset=
-historyData[currentMode]
-.map(item=>
-
-item.main
-.split('')
-.map(n=>Number(n)/9)
-
-);
-
-if(dataset.length<3){
-
-aiStatus.innerText=
-'ข้อมูลน้อยเกินไป';
-
-return;
-
-}
-
-const xs=[];
-const ys=[];
-
-for(
-let i=0;
-i<dataset.length-1;
-i++
-){
-
-xs.push(dataset[i]);
-
-ys.push(dataset[i+1]);
-
-}
-
-await createModel();
-
-await aiModel.fit(
-
-tf.tensor2d(xs),
-
-tf.tensor2d(ys),
-
-{
-
-epochs:30,
-
-shuffle:true
-
-}
-
-);
-
-aiStatus.innerText=
-'AI READY';
-
-}
-
-/* =========================
- PREDICT
-========================= */
-
-async function predictAI(){
-
-if(isGenerating){
-
-return;
-
-}
-
-isGenerating=true;
-
-generateBtn.disabled=true;
-
-generateBtn.innerText=
-'กำลังวิเคราะห์...';
-
-const latest=
-historyData[currentMode][0]
-.main
-.split('')
-.map(n=>Number(n)/9);
-
-const input=
-tf.tensor2d([latest]);
-
-const prediction=
-aiModel.predict(input);
-
-const values=
-await prediction.data();
-
-let result='';
-
-values.forEach(v=>{
-
-result+=
-Math.abs(
-Math.round(v*9)
-)%10;
-
-});
-
-const three=
-result.slice(-3);
-
-const two=
-result.slice(-2);
-
-let bottom='';
-
-if(currentMode==='thai'){
-
-bottom=
-Math.floor(Math.random()*10)
-+
-''
-+
-Math.floor(Math.random()*10);
-
-}else{
-
-bottom=
-result.slice(0,2);
-
-}
-
-renderBalls(
-mainContainer,
-result,
-'bg-gradient-to-br from-emerald-500 to-teal-700'
-);
-
-renderBalls(
-threeContainer,
-three,
-'bg-gradient-to-br from-violet-500 to-indigo-700'
-);
-
-renderBalls(
-twoContainer,
-two,
-'bg-gradient-to-br from-cyan-500 to-blue-700'
-);
-
-renderBalls(
-bottomContainer,
-bottom,
-'bg-gradient-to-br from-yellow-500 to-orange-600'
-);
-
-generateBtn.disabled=false;
-
-generateBtn.innerText=
-'🚀 วิเคราะห์ด้วย AI';
-
-isGenerating=false;
-
-}
-
-/* =========================
- BALLS
-========================= */
+/* ======================
+ BALL
+====================== */
 
 function renderBalls(
 container,
@@ -947,11 +506,86 @@ container.appendChild(div);
 
 }
 
-/* =========================
- MODE
-========================= */
+/* ======================
+ GENERATE
+====================== */
 
-thaiBtn.onclick=async()=>{
+function randomNumber(length){
+
+let result='';
+
+for(let i=0;i<length;i++){
+
+result+=
+Math.floor(Math.random()*10);
+
+}
+
+return result;
+
+}
+
+function generateAI(){
+
+const length=
+currentMode==='thai'
+?6
+:4;
+
+const number=
+randomNumber(length);
+
+const three=
+number.slice(-3);
+
+const two=
+number.slice(-2);
+
+let bottom='';
+
+if(currentMode==='thai'){
+
+bottom=
+randomNumber(2);
+
+}else{
+
+bottom=
+number.slice(0,2);
+
+}
+
+renderBalls(
+mainContainer,
+number,
+'bg-gradient-to-br from-emerald-500 to-teal-700'
+);
+
+renderBalls(
+threeContainer,
+three,
+'bg-gradient-to-br from-violet-500 to-indigo-700'
+);
+
+renderBalls(
+twoContainer,
+two,
+'bg-gradient-to-br from-cyan-500 to-blue-700'
+);
+
+renderBalls(
+bottomContainer,
+bottom,
+'bg-gradient-to-br from-yellow-500 to-orange-600'
+);
+
+}
+
+/* ======================
+ MODE
+====================== */
+
+thaiBtn.onclick=()=>{
 
 currentMode='thai';
 
@@ -965,11 +599,9 @@ renderHistory();
 
 renderHotDigits();
 
-await trainAI();
-
 };
 
-laoBtn.onclick=async()=>{
+laoBtn.onclick=()=>{
 
 currentMode='lao';
 
@@ -983,54 +615,22 @@ renderHistory();
 
 renderHotDigits();
 
-await trainAI();
-
 };
 
-/* =========================
+/* ======================
  BUTTON
-========================= */
+====================== */
 
 generateBtn.onclick=
-predictAI;
+generateAI;
 
-/* =========================
- AUTO UPDATE
-========================= */
-
-setInterval(()=>{
-
-fetchThai();
-
-},300000);
-
-/* =========================
- SERVICE WORKER
-========================= */
-
-if('serviceWorker' in navigator){
-
-navigator.serviceWorker.register('./sw.js');
-
-}
-
-/* =========================
+/* ======================
  START
-========================= */
-
-window.onload=async()=>{
-
-listenRealtime();
-
-await fetchThai();
+====================== */
 
 renderHistory();
 
 renderHotDigits();
-
-await trainAI();
-
-};
 
 </script>
 
