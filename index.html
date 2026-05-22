@@ -11,8 +11,6 @@ content="width=device-width, initial-scale=1.0">
 
 <title>Turbo Lotto AI</title>
 
-<!-- FONT -->
-
 <link rel="preconnect"
 href="https://fonts.googleapis.com">
 
@@ -23,8 +21,6 @@ crossorigin>
 <link
 href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap"
 rel="stylesheet">
-
-<!-- TAILWIND -->
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -86,12 +82,6 @@ opacity:1;
 
 }
 
-.loading{
-
-animation:pulse 1s infinite;
-
-}
-
 </style>
 
 </head>
@@ -110,7 +100,7 @@ animation:pulse 1s infinite;
 
 <p class="text-center text-cyan-400 mb-6">
 
-Realtime Auto Update
+AI Prediction System
 
 </p>
 
@@ -120,7 +110,7 @@ Realtime Auto Update
 
 <button
 id="thaiBtn"
-class="flex-1 bg-emerald-600 py-3 rounded-xl font-bold">
+class="flex-1 bg-emerald-600 py-3 rounded-xl font-bold transition">
 
 🇹🇭 หวยไทย
 
@@ -128,7 +118,7 @@ class="flex-1 bg-emerald-600 py-3 rounded-xl font-bold">
 
 <button
 id="laoBtn"
-class="flex-1 bg-slate-800 py-3 rounded-xl font-bold">
+class="flex-1 bg-slate-800 py-3 rounded-xl font-bold transition">
 
 🇱🇦 หวยลาว
 
@@ -216,7 +206,7 @@ class="flex justify-center gap-2 flex-wrap">
 
 </div>
 
-<!-- HOT -->
+<!-- HOT DIGITS -->
 
 <div class="mt-8">
 
@@ -229,24 +219,6 @@ class="flex justify-center gap-2 flex-wrap">
 <div
 id="hotDigits"
 class="grid grid-cols-5 gap-2">
-
-</div>
-
-</div>
-
-<!-- HISTORY -->
-
-<div class="mt-8">
-
-<h2 class="font-bold mb-3">
-
-📊 ผลย้อนหลังจริง
-
-</h2>
-
-<div
-id="historyContainer"
-class="space-y-3">
 
 </div>
 
@@ -268,13 +240,21 @@ let currentMode='thai';
  DATA
 ========================= */
 
-const historyData={
+const thaiNumbers=[
+'985452',
+'284729',
+'543118',
+'074205',
+'998887'
+];
 
-thai:[],
-
-lao:[]
-
-};
+const laoNumbers=[
+'8769',
+'0470',
+'3369',
+'7095',
+'9996'
+];
 
 /* =========================
  ELEMENTS
@@ -301,199 +281,8 @@ document.getElementById('twoContainer');
 const bottomContainer=
 document.getElementById('bottomContainer');
 
-const historyContainer=
-document.getElementById('historyContainer');
-
 const hotDigits=
 document.getElementById('hotDigits');
-
-/* =========================
- THAI API REAL
-========================= */
-
-async function fetchThaiHistory(){
-
-try{
-
-const response=
-await fetch(
-'https://lotto.api.rayriffy.com/history'
-);
-
-const json=
-await response.json();
-
-historyData.thai=
-json.response
-.slice(0,5)
-.map(item=>{
-
-const firstPrize=
-item.prizes.find(
-p=>p.id==='first'
-);
-
-const lastTwo=
-item.runningNumbers.find(
-n=>n.id==='lastTwo'
-);
-
-return{
-
-date:item.date,
-
-main:firstPrize.number,
-
-bottom:lastTwo.number
-
-};
-
-});
-
-renderHistory();
-
-renderHotDigits();
-
-}catch(error){
-
-console.log(error);
-
-}
-
-}
-
-/* =========================
- LAO HISTORY
-========================= */
-
-async function fetchLaoHistory(){
-
-/*
-API หวยลาวจริงหาได้ยาก
-ตอนนี้ใช้ mock realtime ก่อน
-*/
-
-historyData.lao=[
-
-{
-date:'20 พ.ค. 69',
-main:'8769'
-},
-
-{
-date:'18 พ.ค. 69',
-main:'9572'
-},
-
-{
-date:'15 พ.ค. 69',
-main:'3417'
-},
-
-{
-date:'13 พ.ค. 69',
-main:'7804'
-},
-
-{
-date:'11 พ.ค. 69',
-main:'1932'
-}
-
-];
-
-renderHistory();
-
-renderHotDigits();
-
-}
-
-/* =========================
- HISTORY
-========================= */
-
-function renderHistory(){
-
-historyContainer.innerHTML='';
-
-historyData[currentMode]
-.forEach(item=>{
-
-const div=
-document.createElement('div');
-
-div.className=
-'glass rounded-2xl p-4';
-
-if(currentMode==='thai'){
-
-div.innerHTML=`
-
-<div class="flex justify-between mb-2">
-
-<span class="text-emerald-400 text-xs">
-
-${item.date}
-
-</span>
-
-<span class="text-yellow-400 text-xs">
-
-ล่าง ${item.bottom}
-
-</span>
-
-</div>
-
-<div class="text-2xl font-bold">
-
-${item.main}
-
-</div>
-
-`;
-
-}else{
-
-const top=
-item.main.slice(-2);
-
-const bottom=
-item.main.slice(0,2);
-
-div.innerHTML=`
-
-<div class="flex justify-between mb-2">
-
-<span class="text-red-400 text-xs">
-
-${item.date}
-
-</span>
-
-</div>
-
-<div class="text-2xl font-bold">
-
-${item.main}
-
-</div>
-
-<div class="text-xs text-slate-400 mt-2">
-
-บน ${top} | ล่าง ${bottom}
-
-</div>
-
-`;
-
-}
-
-historyContainer.appendChild(div);
-
-});
-
-}
 
 /* =========================
  HOT DIGITS
@@ -511,10 +300,14 @@ freq[i]=0;
 
 }
 
-historyData[currentMode]
-.forEach(item=>{
+const source=
+currentMode==='thai'
+?thaiNumbers
+:laoNumbers;
 
-item.main
+source.forEach(item=>{
+
+item
 .split('')
 .forEach(n=>{
 
@@ -589,7 +382,7 @@ container.appendChild(div);
 }
 
 /* =========================
- RANDOM AI
+ AI RANDOM
 ========================= */
 
 function weightedRandom(){
@@ -602,13 +395,17 @@ freq[i]=1;
 
 }
 
-historyData[currentMode]
-.forEach((item,index)=>{
+const source=
+currentMode==='thai'
+?thaiNumbers
+:laoNumbers;
+
+source.forEach((item,index)=>{
 
 const weight=
-historyData[currentMode].length-index;
+source.length-index;
 
-item.main
+item
 .split('')
 .forEach(n=>{
 
@@ -716,12 +513,10 @@ thaiBtn.onclick=()=>{
 currentMode='thai';
 
 thaiBtn.className=
-'flex-1 bg-emerald-600 py-3 rounded-xl font-bold';
+'flex-1 bg-emerald-600 py-3 rounded-xl font-bold transition';
 
 laoBtn.className=
-'flex-1 bg-slate-800 py-3 rounded-xl font-bold';
-
-renderHistory();
+'flex-1 bg-slate-800 py-3 rounded-xl font-bold transition';
 
 renderHotDigits();
 
@@ -732,12 +527,10 @@ laoBtn.onclick=()=>{
 currentMode='lao';
 
 laoBtn.className=
-'flex-1 bg-red-600 py-3 rounded-xl font-bold';
+'flex-1 bg-red-600 py-3 rounded-xl font-bold transition';
 
 thaiBtn.className=
-'flex-1 bg-slate-800 py-3 rounded-xl font-bold';
-
-renderHistory();
+'flex-1 bg-slate-800 py-3 rounded-xl font-bold transition';
 
 renderHotDigits();
 
@@ -751,32 +544,10 @@ generateBtn.onclick=
 generateAI;
 
 /* =========================
- AUTO UPDATE
-========================= */
-
-async function autoUpdate(){
-
-await fetchThaiHistory();
-
-await fetchLaoHistory();
-
-}
-
-setInterval(()=>{
-
-autoUpdate();
-
-},300000);
-
-/* =========================
  START
 ========================= */
 
-window.onload=async()=>{
-
-await autoUpdate();
-
-};
+renderHotDigits();
 
 </script>
 
